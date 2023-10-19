@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">OneArmedBanditGame</string>
     <string name="roll">Roll</string>
+    <string name="reset">Reset</string>
+    <string name="app_description">One Armed Bandit Game</string>
+    <string name="win_counts">Wins :  </string>
+    <string name="played_counts">Played : </string>
 </resources>

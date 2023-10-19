@@ -68,96 +68,172 @@ fun OneArmedBanditGameApp(){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameButtonAndImage(modifier: Modifier = Modifier){
+fun GameButtonAndImage(modifier: Modifier = Modifier) {
 
     var winCounts by remember { mutableStateOf(0) }
     var playedCounts by remember { mutableStateOf(0) }
     var enabled by remember { mutableStateOf(true) }
+    var win by remember { mutableStateOf(false) }
 
-    CenterAlignedTopAppBar(
-        title = { Text(stringResource(R.string.app_name)) },
-        navigationIcon = {
-            IconButton(onClick = { winCounts = 0; playedCounts =0; enabled = true}) {
-                Icon(
-                    imageVector = Icons.Filled.Clear,
-                    contentDescription = "Localized description"
-                )
+    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
+        CenterAlignedTopAppBar(
+            title = { Text(stringResource(R.string.app_name)) },
+//        navigationIcon = {
+//            Box(modifier = Modifier.size(48.dp).background(Color.Gray, shape = RoundedCornerShape(4.dp))) {
+//
+//                IconButton(onClick = { winCounts = 0; playedCounts = 0; enabled = true }) {
+////                Icon(
+////                    imageVector = Icons.Filled.Clear,
+////                    contentDescription = "Localized description"
+////                )
+//                    Text(stringResource(R.string.reset))
+//                }
+//            }
+//        },
+            actions = {
+                Box(
+                    modifier = Modifier
+                        .size(width = 48.dp, height = 36.dp)
+                        .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+                ) {
+
+                    IconButton(onClick = { winCounts = 0; playedCounts = 0; enabled = true }) {
+                        Text(stringResource(R.string.reset))
+                    }
+                }
             }
-        }
-    )
-    Box(modifier = modifier.padding(top = 60.dp)) {
-        Image(
-            painter = painterResource(id = R.drawable.halloween_wallpaper_1),
-            contentDescription = "background",
-            contentScale = ContentScale.FillBounds,
-            modifier = modifier.matchParentSize()
         )
+        Box(modifier = Modifier) {
+            Image(
+                painter = painterResource(id = R.drawable.halloween_wallpaper_1),
+                contentDescription = "background",
+                contentScale = ContentScale.FillBounds,
+                modifier = modifier.matchParentSize()
+            )
 
-        var result1 by remember { mutableStateOf(randomNumbers(1, 6)) }
-        var result2 by remember { mutableStateOf(randomNumbers(1, 6)) }
-        var result3 by remember { mutableStateOf(randomNumbers(1, 6)) }
-        var loading by remember { mutableStateOf(false) }
-        val imageResource1 = displayImage(result1)
-        val imageResource2 = displayImage(result2)
-        val imageResource3 = displayImage(result3)
-
-        Column(modifier = modifier.wrapContentSize(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
-            Row(modifier = Modifier.padding(bottom = 50.dp),horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Box(modifier = Modifier.background(Color.Gray, shape = RoundedCornerShape(4.dp))) {
-
-                    Image(
-                        painter = painterResource(id = imageResource1),
-                        contentDescription = result1.toString(),
-                        modifier = Modifier.size(100.dp)
-                    )
-                }
-                Box(modifier = Modifier.background(Color.Gray, shape = RoundedCornerShape(4.dp))) {
-                    Image(
-                        painter = painterResource(id = imageResource2),
-                        contentDescription = result2.toString(),
-                        modifier = Modifier.size(100.dp)
-                    )
-                }
-                Box(modifier = Modifier.background(Color.Gray, shape = RoundedCornerShape(4.dp))) {
-                    Image(
-                        painter = painterResource(id = imageResource3),
-                        contentDescription = result3.toString(),
-                        modifier = Modifier.size(100.dp)
-                    )
-                }
-        }
-
-            LaunchedEffect(enabled){
-                if (enabled) return@LaunchedEffect
-                else delay(1000L)
-                enabled = true
+            Row(
+                modifier = modifier.wrapContentSize(Alignment.TopCenter),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(stringResource(R.string.win_counts) + " " + winCounts.toString())
+                Text(stringResource(R.string.played_counts) + " " + playedCounts.toString())
             }
 
+            var result1 by remember { mutableStateOf(randomNumbers(1, 6)) }
+            var result2 by remember { mutableStateOf(randomNumbers(1, 6)) }
+            var result3 by remember { mutableStateOf(randomNumbers(1, 6)) }
+            var loading by remember { mutableStateOf(false) }
+            val imageResource1 = displayImage(result1)
+            val imageResource2 = displayImage(result2)
+            val imageResource3 = displayImage(result3)
 
-            Button(onClick = {
-                MainScope().launch {
-                    loading = true
-                    for(i in 1..100){
-                        result1 = randomNumbers(1,6)
-                        result2 = randomNumbers(1,6)
-                        result3 = randomNumbers(1,6)
-                        if(enabled){
-                            break
+            Column(
+                modifier = modifier.wrapContentSize(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier.padding(bottom = 50.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.background(
+                            Color.Gray,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                    ) {
+
+                        Image(
+                            painter = painterResource(id = imageResource1),
+                            contentDescription = result1.toString(),
+                            modifier = Modifier.size(100.dp)
+                        )
+                    }
+                    Box(
+                        modifier = Modifier.background(
+                            Color.Gray,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                    ) {
+                        Image(
+                            painter = painterResource(id = imageResource2),
+                            contentDescription = result2.toString(),
+                            modifier = Modifier.size(100.dp)
+                        )
+                    }
+                    Box(
+                        modifier = Modifier.background(
+                            Color.Gray,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                    ) {
+                        Image(
+                            painter = painterResource(id = imageResource3),
+                            contentDescription = result3.toString(),
+                            modifier = Modifier.size(100.dp)
+                        )
+                    }
+                }
+                if (playedCounts > 0) {
+                    Row(
+                        modifier = Modifier.padding(bottom = 50.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        if (win) {
+                            Image(
+                                painter = painterResource(id = R.drawable.winner),
+                                contentDescription = "winner chicken dinner",
+                                modifier = Modifier.size(100.dp)
+                            )
+
                         } else {
-                            delay(100)
+                            Image(
+                                painter = painterResource(id = R.drawable.game_over_border),
+                                contentDescription = "loser",
+                                modifier = Modifier.size(100.dp)
+                            )
                         }
                     }
-                    loading = false
-                    winCounts += checkIfWin(result1, result2, result3)
-                };
-                playedCounts += 1;
-                Log.d("Results", "$result1,$result2,$result3");
-                enabled = false
-            }, modifier = Modifier.size(100.dp,50.dp),
-                enabled = enabled) {
-                Text(stringResource(R.string.roll))
-            }
+                }
+                LaunchedEffect(enabled) {
+                    if (enabled) return@LaunchedEffect
+                    else delay(1000L)
+                    enabled = true
+                }
 
+
+                Button(
+                    onClick = {
+                        MainScope().launch {
+                            loading = true
+                            for (i in 1..100) {
+                                result1 = randomNumbers(1, 6)
+                                result2 = randomNumbers(1, 6)
+                                result3 = randomNumbers(1, 6)
+                                if (enabled) {
+                                    break
+                                } else {
+                                    delay(100)
+                                }
+                            }
+                            loading = false
+                            if (checkIfWin(result1, result2, result3) == 1) {
+                                winCounts += 1
+                                win = true
+                            } else {
+                                win = false
+                            }
+
+                        };
+                        playedCounts += 1;
+                        Log.d("Results", "$result1,$result2,$result3");
+                        enabled = false
+                    }, modifier = Modifier.size(100.dp, 50.dp),
+                    enabled = enabled
+                ) {
+                    Text(stringResource(R.string.roll))
+                }
+
+            }
         }
     }
 }
