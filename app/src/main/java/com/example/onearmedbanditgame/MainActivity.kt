@@ -12,18 +12,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -75,33 +74,9 @@ fun GameButtonAndImage(modifier: Modifier = Modifier) {
     var enabled by remember { mutableStateOf(true) }
     var win by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
         CenterAlignedTopAppBar(
-            title = { Text(stringResource(R.string.app_name)) },
-//        navigationIcon = {
-//            Box(modifier = Modifier.size(48.dp).background(Color.Gray, shape = RoundedCornerShape(4.dp))) {
-//
-//                IconButton(onClick = { winCounts = 0; playedCounts = 0; enabled = true }) {
-////                Icon(
-////                    imageVector = Icons.Filled.Clear,
-////                    contentDescription = "Localized description"
-////                )
-//                    Text(stringResource(R.string.reset))
-//                }
-//            }
-//        },
-            actions = {
-                Box(
-                    modifier = Modifier
-                        .size(width = 48.dp, height = 36.dp)
-                        .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
-                ) {
-
-                    IconButton(onClick = { winCounts = 0; playedCounts = 0; enabled = true }) {
-                        Text(stringResource(R.string.reset))
-                    }
-                }
-            }
+            title = { Text(stringResource(R.string.app_name)) }
         )
         Box(modifier = Modifier) {
             Image(
@@ -111,18 +86,44 @@ fun GameButtonAndImage(modifier: Modifier = Modifier) {
                 modifier = modifier.matchParentSize()
             )
 
-            Row(
-                modifier = modifier.wrapContentSize(Alignment.TopCenter),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(stringResource(R.string.win_counts) + " " + winCounts.toString())
-                Text(stringResource(R.string.played_counts) + " " + playedCounts.toString())
+            Row(modifier = Modifier.padding(top = 16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+
+                Box(
+                    modifier = Modifier
+                        .background(Color.Gray, shape = RoundedCornerShape(4.dp))
+                        .defaultMinSize(minWidth = 80.dp, minHeight = 30.dp)
+                        .wrapContentSize(Alignment.Center)
+                ) {
+                    Text(stringResource(R.string.played_counts) + " " + playedCounts.toString())
+                }
+
+                Box(
+                    modifier = Modifier
+                        .background(Color.Gray, shape = RoundedCornerShape(4.dp))
+                        .defaultMinSize(minWidth = 110.dp, minHeight = 30.dp)
+                        .wrapContentSize(Alignment.Center)
+                ) {
+                    if (playedCounts == 0) {
+                        Text(stringResource(R.string.win_ratio) + " " + "0.00")
+                    } else {
+                        Text(stringResource(R.string.win_ratio) + " " + "%.2f".format(winCounts.toFloat() / playedCounts.toFloat()))
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .background(Color.Gray, shape = RoundedCornerShape(4.dp))
+                        .defaultMinSize(minWidth = 60.dp, minHeight = 30.dp)
+                        .wrapContentSize(Alignment.Center)
+                ) {
+                    Text(stringResource(R.string.win_counts) + " " + winCounts.toString())
+                }
             }
 
             var result1 by remember { mutableStateOf(randomNumbers(1, 6)) }
             var result2 by remember { mutableStateOf(randomNumbers(1, 6)) }
             var result3 by remember { mutableStateOf(randomNumbers(1, 6)) }
-            var loading by remember { mutableStateOf(false) }
+            var loading by remember { mutableStateOf(true) }
             val imageResource1 = displayImage(result1)
             val imageResource2 = displayImage(result2)
             val imageResource3 = displayImage(result3)
@@ -173,11 +174,12 @@ fun GameButtonAndImage(modifier: Modifier = Modifier) {
                         )
                     }
                 }
-                if (playedCounts > 0) {
+
                     Row(
-                        modifier = Modifier.padding(bottom = 50.dp),
+                        modifier = Modifier.size(200.dp).padding(bottom = 50.dp),
                         horizontalArrangement = Arrangement.Center
                     ) {
+                        if (playedCounts > 0 && !loading) {
                         if (win) {
                             Image(
                                 painter = painterResource(id = R.drawable.winner),
@@ -201,42 +203,53 @@ fun GameButtonAndImage(modifier: Modifier = Modifier) {
                 }
 
 
-                Button(
-                    onClick = {
-                        MainScope().launch {
-                            loading = true
-                            for (i in 1..100) {
-                                result1 = randomNumbers(1, 6)
-                                result2 = randomNumbers(1, 6)
-                                result3 = randomNumbers(1, 6)
-                                if (enabled) {
-                                    break
-                                } else {
-                                    delay(100)
+                Row(modifier = Modifier.width(300.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+
+
+                    Button(
+                        onClick = {
+                            MainScope().launch {
+                                loading = true
+                                for (i in 1..100) {
+                                    result1 = randomNumbers(1, 6)
+                                    result2 = randomNumbers(1, 6)
+                                    result3 = randomNumbers(1, 6)
+                                    if (enabled) {
+                                        break
+                                    } else {
+                                        delay(100)
+                                    }
                                 }
-                            }
-                            loading = false
-                            if (checkIfWin(result1, result2, result3) == 1) {
-                                winCounts += 1
-                                win = true
-                            } else {
-                                win = false
-                            }
+                                loading = false
+                                if (checkIfWin(result1, result2, result3) == 1) {
+                                    winCounts += 1
+                                    win = true
+                                } else {
+                                    win = false
+                                }
 
-                        };
-                        playedCounts += 1;
-                        Log.d("Results", "$result1,$result2,$result3");
-                        enabled = false
-                    }, modifier = Modifier.size(100.dp, 50.dp),
-                    enabled = enabled
-                ) {
-                    Text(stringResource(R.string.roll))
+                            };
+                            playedCounts += 1;
+                            Log.d("Results", "$result1,$result2,$result3");
+                            enabled = false
+                            loading = true
+                        }, modifier = Modifier.size(100.dp, 50.dp),
+                        enabled = enabled
+                    ) {
+                        Text(stringResource(R.string.roll))
+                    }
+
+
+
+                        Button(modifier = Modifier.size(100.dp, 50.dp),onClick = { winCounts = 0; playedCounts = 0; enabled = true }) {
+                            Text(stringResource(R.string.reset))
+                        }
+                    }
+
                 }
-
             }
         }
     }
-}
 
 
 fun randomNumbers(x: Int,y:Int):Int{

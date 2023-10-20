@@ -2,4 +2,12 @@
 <resources>
 
     <style name="Theme.OneArmedBanditGame" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="SplashTheme" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:colorPrimary">@color/purple_500</item>
+        <item name="android:colorPrimaryDark">@color/purple_700</item>
+        <item name="android:colorAccent">@color/purple_200</item>
+        <item name="android:statusBarColor">@color/purple_200</item>
+    </style>
+
 </resources>
