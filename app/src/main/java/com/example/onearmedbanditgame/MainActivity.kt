@@ -2,6 +2,8 @@
 
 package com.example.onearmedbanditgame
 
+import android.media.MediaPlayer
+
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -44,31 +46,42 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private val mediaPlayer:MediaPlayer by lazy{
+        MediaPlayer.create(this, R.raw.coindrop)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             OneArmedBanditGameTheme {
                 // A surface container using the 'background' color from the theme
 //                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
 //                    Greeting("Android")
 //                }
-                OneArmedBanditGameApp()
+                OneArmedBanditGameApp(mediaPlayer)
             }
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer.release()
+    }
 }
 
-@Preview
+
+//@Preview
 @Composable
-fun OneArmedBanditGameApp(){
-    GameButtonAndImage(modifier = Modifier.fillMaxSize()
+fun OneArmedBanditGameApp(mediaPlayer: MediaPlayer){
+    GameButtonAndImage(mediaPlayer = mediaPlayer, modifier = Modifier.fillMaxSize()
+
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameButtonAndImage(modifier: Modifier = Modifier) {
-
+fun GameButtonAndImage(mediaPlayer: MediaPlayer,modifier: Modifier = Modifier) {
     var winCounts by remember { mutableStateOf(0) }
     var playedCounts by remember { mutableStateOf(0) }
     var enabled by remember { mutableStateOf(true) }
@@ -104,9 +117,9 @@ fun GameButtonAndImage(modifier: Modifier = Modifier) {
                         .wrapContentSize(Alignment.Center)
                 ) {
                     if (playedCounts == 0) {
-                        Text(stringResource(R.string.win_ratio) + " " + "0.00")
+                        Text(stringResource(R.string.win_ratio) + " " + "0%")
                     } else {
-                        Text(stringResource(R.string.win_ratio) + " " + "%.2f".format(winCounts.toFloat() / playedCounts.toFloat()))
+                        Text(stringResource(R.string.win_ratio) + " " + "%.2f" .format(winCounts.toDouble() / playedCounts.toDouble() * 100) + "%" )
                     }
                 }
 
@@ -127,6 +140,8 @@ fun GameButtonAndImage(modifier: Modifier = Modifier) {
             val imageResource1 = displayImage(result1)
             val imageResource2 = displayImage(result2)
             val imageResource3 = displayImage(result3)
+
+
 
             Column(
                 modifier = modifier.wrapContentSize(Alignment.Center),
@@ -204,8 +219,6 @@ fun GameButtonAndImage(modifier: Modifier = Modifier) {
 
 
                 Row(modifier = Modifier.width(300.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-
-
                     Button(
                         onClick = {
                             MainScope().launch {
@@ -228,20 +241,33 @@ fun GameButtonAndImage(modifier: Modifier = Modifier) {
                                     win = false
                                 }
 
-                            };
-                            playedCounts += 1;
-                            Log.d("Results", "$result1,$result2,$result3");
+                            }
+                            playedCounts += 1
+                            Log.d("Results", "$result1,$result2,$result3")
+                            Log.d("Counts", "$winCounts,$playedCounts")
                             enabled = false
                             loading = true
+
                         }, modifier = Modifier.size(100.dp, 50.dp),
                         enabled = enabled
                     ) {
                         Text(stringResource(R.string.roll))
+                        }
+                    }
+
+                    if(loading){
+                        mediaPlayer.isLooping = true
+                        mediaPlayer.playbackParams = mediaPlayer.playbackParams.setSpeed(1.5f)
+                        mediaPlayer.start()
+                    } else{
+                        mediaPlayer.stop()
                     }
 
 
-
-                        Button(modifier = Modifier.size(100.dp, 50.dp),onClick = { winCounts = 0; playedCounts = 0; enabled = true }) {
+                        Button(modifier = Modifier.size(100.dp, 50.dp),
+                            onClick = { Log.d("Results","Previous results reset: $winCounts,$playedCounts")
+                                winCounts = 0; playedCounts = 0; enabled = true
+                            }) {
                             Text(stringResource(R.string.reset))
                         }
                     }
@@ -249,7 +275,7 @@ fun GameButtonAndImage(modifier: Modifier = Modifier) {
                 }
             }
         }
-    }
+
 
 
 fun randomNumbers(x: Int,y:Int):Int{
