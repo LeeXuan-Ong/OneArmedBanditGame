@@ -3,6 +3,7 @@
 package com.example.onearmedbanditgame
 
 import android.media.MediaPlayer
+import android.net.Uri
 
 import android.os.Bundle
 import android.util.Log
@@ -44,15 +45,23 @@ import com.example.onearmedbanditgame.ui.theme.OneArmedBanditGameTheme
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.IOException
+import java.net.URI
 
 class MainActivity : ComponentActivity() {
-    private val mediaPlayer:MediaPlayer by lazy{
-        MediaPlayer.create(this, R.raw.coindrop)
-    }
+    private lateinit var mediaPlayer: MediaPlayer
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        try {
+            mediaPlayer = MediaPlayer()
+            mediaPlayer.setDataSource(this, Uri.parse("android.resource://${packageName}/${R.raw.spinning}"))
+            mediaPlayer.isLooping = true
+        } catch (e: IOException) {
+            // Handle the IOException, for example, show an error message to the user.
+            Log.e("MediaPlayer", "Error setting data source: ${e.message}")
+        }
         setContent {
             OneArmedBanditGameTheme {
                 // A surface container using the 'background' color from the theme
@@ -190,11 +199,11 @@ fun GameButtonAndImage(mediaPlayer: MediaPlayer,modifier: Modifier = Modifier) {
                     }
                 }
 
-                    Row(
-                        modifier = Modifier.size(200.dp).padding(bottom = 50.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        if (playedCounts > 0 && !loading) {
+                Row(
+                    modifier = Modifier.size(200.dp).padding(bottom = 50.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    if (playedCounts > 0 && !loading) {
                         if (win) {
                             Image(
                                 painter = painterResource(id = R.drawable.winner),
@@ -218,11 +227,17 @@ fun GameButtonAndImage(mediaPlayer: MediaPlayer,modifier: Modifier = Modifier) {
                 }
 
 
-                Row(modifier = Modifier.width(300.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+
+
+                Row(
+                    modifier = Modifier.width(300.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
                     Button(
                         onClick = {
                             MainScope().launch {
                                 loading = true
+                                mediaPlayer.start()
                                 for (i in 1..100) {
                                     result1 = randomNumbers(1, 6)
                                     result2 = randomNumbers(1, 6)
@@ -241,40 +256,32 @@ fun GameButtonAndImage(mediaPlayer: MediaPlayer,modifier: Modifier = Modifier) {
                                     win = false
                                 }
 
+                                mediaPlayer.stop()
                             }
+                            mediaPlayer.prepare()
                             playedCounts += 1
                             Log.d("Results", "$result1,$result2,$result3")
                             Log.d("Counts", "$winCounts,$playedCounts")
                             enabled = false
-                            loading = true
-
                         }, modifier = Modifier.size(100.dp, 50.dp),
                         enabled = enabled
                     ) {
                         Text(stringResource(R.string.roll))
-                        }
-                    }
-
-                    if(loading){
-                        mediaPlayer.isLooping = true
-                        mediaPlayer.playbackParams = mediaPlayer.playbackParams.setSpeed(1.5f)
-                        mediaPlayer.start()
-                    } else{
-                        mediaPlayer.stop()
                     }
 
 
-                        Button(modifier = Modifier.size(100.dp, 50.dp),
-                            onClick = { Log.d("Results","Previous results reset: $winCounts,$playedCounts")
-                                winCounts = 0; playedCounts = 0; enabled = true
-                            }) {
-                            Text(stringResource(R.string.reset))
-                        }
+                    Button(modifier = Modifier.size(100.dp, 50.dp),
+                        onClick = {
+                            Log.d("Results", "Previous results reset: $winCounts,$playedCounts")
+                            winCounts = 0; playedCounts = 0; enabled = true
+                        }) {
+                        Text(stringResource(R.string.reset))
                     }
-
                 }
             }
         }
+    }
+}
 
 
 
